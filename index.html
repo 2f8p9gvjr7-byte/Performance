@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Éval & Bonus"/>
+  <meta name="theme-color" content="#0F1117"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" href="icon-192.png"/>
+  <title>Évaluation & Bonus</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0F1117; --surface: #1A1D27; --card: #22263A; --border: #2E3350;
+      --accent: #6C63FF; --accentL: #8B85FF; --green: #34D399; --amber: #FBBF24;
+      --red: #F87171; --text: #E8EAFF; --muted: #8B90BB; --faint: #4A4F72;
+    }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, 'Inter', sans-serif; }
+    body { display: flex; flex-direction: column; padding-bottom: env(safe-area-inset-bottom); }
+    input[type=number]::-webkit-inner-spin-button { opacity: 1; }
+
+    /* Header */
+    .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 16px; display: flex; align-items: center; gap: 12; position: sticky; top: 0; z-index: 10; }
+    .header-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .header-title { font-weight: 800; font-size: 16px; }
+    .header-sub { color: var(--muted); font-size: 11px; margin-top: 1px; }
+    .header-stats { margin-left: auto; font-size: 12px; color: var(--muted); text-align: right; }
+    .header-stats span { color: var(--text); font-weight: 700; }
+
+    /* Tabs */
+    .tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; flex-shrink: 0; }
+    .tab { flex: 1; padding: 12px 8px; font-size: 12px; font-weight: 600; border: none; background: transparent; color: var(--muted); cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent; transition: all .2s; }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* Content */
+    .content { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+    /* Cards */
+    .card { background: var(--card); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .card-header { background: var(--surface); padding: 12px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10; }
+    .card-body { padding: 14px; display: flex; flex-direction: column; gap: 12; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; flex-shrink: 0; }
+    .name { font-weight: 700; font-size: 15px; }
+    .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+
+    /* Row */
+    .row { display: flex; align-items: center; gap: 10; }
+    .row-label { flex: 1; }
+    .row-label .crit-name { font-size: 13px; font-weight: 600; }
+    .row-label .crit-weight { color: var(--faint); font-size: 11px; margin-top: 2px; }
+
+    /* Bar */
+    .bar-wrap { height: 5px; background: var(--border); border-radius: 4px; overflow: hidden; flex: 1; min-width: 50px; }
+    .bar-fill { height: 100%; border-radius: 4px; transition: width .4s; }
+
+    /* Inputs */
+    input[type=text], input[type=number] {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-size: 14px; padding: 8px 10px; outline: none; width: 100%;
+      -webkit-appearance: none;
+    }
+    input[type=number] { text-align: center; width: 60px; min-width: 60px; }
+    .input-row { display: flex; gap: 8px; align-items: center; background: var(--surface); border: 1px dashed var(--border); border-radius: 10px; padding: 10px 12px; }
+    .input-row input[type=text] { flex: 1; border: none; background: transparent; padding: 0; }
+
+    /* Buttons */
+    .btn { border: none; border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 13px; cursor: pointer; }
+    .btn-accent { background: var(--accent); color: #fff; }
+    .btn-ghost { background: transparent; color: var(--faint); font-size: 18px; padding: 0 6px; }
+
+    /* Badge */
+    .badge { display: inline-block; border-radius: 20px; padding: 2px 10px; font-size: 11px; font-weight: 700; }
+
+    /* Weight total */
+    .weight-pill { padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 14px; }
+
+    /* Crit item */
+    .crit-item { display: flex; align-items: center; gap: 8; background: var(--card); border-radius: 10px; border: 1px solid var(--border); padding: 10px 12px; }
+    .crit-item input[type=text] { flex: 1; border: none; background: transparent; font-weight: 600; font-size: 14px; }
+    .crit-item input[type=number] { width: 54px; min-width: 54px; }
+    .pct { color: var(--faint); font-size: 12px; }
+
+    /* Collab item */
+    .collab-item { display: flex; align-items: center; gap: 10; background: var(--card); border-radius: 10px; border: 1px solid var(--border); padding: 10px 12px; }
+
+    /* Results */
+    .result-card { border-radius: 14px; border: 1px solid var(--border); padding: 14px 16px; display: flex; align-items: center; gap: 12; flex-wrap: wrap; }
+    .score-big { font-size: 22px; font-weight: 800; }
+    .score-label { color: var(--faint); font-size: 11px; }
+    .bonus-box { background: #34D39922; border: 1px solid #34D39944; border-radius: 10px; padding: 8px 14px; text-align: center; }
+    .bonus-amount { color: var(--green); font-weight: 800; font-size: 18px; }
+    .summary { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); padding: 14px 16px; display: flex; flex-direction: column; gap: 6; font-size: 13px; color: var(--muted); }
+    .summary strong { color: var(--text); }
+
+    /* Envelope */
+    .envelope-card { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 14px 16px; display: flex; align-items: center; gap: 12; flex-wrap: wrap; }
+    .envelope-card input[type=number] { width: 130px; min-width: 130px; font-size: 20px; font-weight: 800; border-color: var(--accent); text-align: right; }
+
+    section { display: none; }
+    section.active { display: flex; flex-direction: column; gap: 14px; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="header-icon">⭐</div>
+  <div>
+    <div class="header-title">Évaluation & Bonus</div>
+    <div class="header-sub">Notation pondérée · Distribution</div>
+  </div>
+  <div class="header-stats">
+    <div><span id="nb-collabs">0</span> collaborateurs</div>
+    <div><span id="nb-crit">0</span> critères</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab(0)">① Critères</button>
+  <button class="tab" onclick="showTab(1)">② Évaluations</button>
+  <button class="tab" onclick="showTab(2)">③ Résultats</button>
+</div>
+
+<div class="content">
+
+  <!-- TAB 0 -->
+  <section class="active" id="tab0">
+    <div class="row" style="justify-content:space-between; align-items:flex-start">
+      <div>
+        <div style="font-weight:700; font-size:15px">Critères</div>
+        <div style="color:var(--muted); font-size:12px; margin-top:3px">Total doit faire 100%</div>
+      </div>
+      <div class="weight-pill" id="weight-pill">Total : 0%</div>
+    </div>
+    <div id="crit-list" style="display:flex; flex-direction:column; gap:8px"></div>
+    <div class="input-row" id="add-crit-row">
+      <input type="text" id="new-crit-name" placeholder="Nouveau critère…" onkeydown="if(event.key==='Enter')addCrit()"/>
+      <input type="number" id="new-crit-w" value="20" min="0" max="100" style="width:54px; min-width:54px"/>
+      <span class="pct">%</span>
+      <button class="btn btn-accent" onclick="addCrit()">+</button>
+    </div>
+
+    <div style="font-weight:700; font-size:15px; margin-top:6px">Collaborateurs</div>
+    <div id="collab-list" style="display:flex; flex-direction:column; gap:8px"></div>
+    <div class="input-row">
+      <input type="text" id="new-collab-name" placeholder="Nom du collaborateur…" onkeydown="if(event.key==='Enter')addCollab()"/>
+      <button class="btn btn-accent" onclick="addCollab()">+</button>
+    </div>
+  </section>
+
+  <!-- TAB 1 -->
+  <section id="tab1">
+    <div style="color:var(--muted); font-size:13px">Notez chaque collaborateur de 0 à 10.</div>
+    <div id="eval-list" style="display:flex; flex-direction:column; gap:14px"></div>
+  </section>
+
+  <!-- TAB 2 -->
+  <section id="tab2">
+    <div class="envelope-card">
+      <div style="flex:1">
+        <div style="font-weight:700; font-size:15px">Enveloppe bonus</div>
+        <div style="color:var(--muted); font-size:12px; margin-top:3px">Distribué proportionnellement aux notes</div>
+      </div>
+      <input type="number" id="envelope" value="10000" min="0" onchange="renderResults()"/>
+      <span style="color:var(--muted); font-weight:700; font-size:16px">€</span>
+    </div>
+    <div id="results-list" style="display:flex; flex-direction:column; gap:10px"></div>
+    <div class="summary" id="summary"></div>
+  </section>
+
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────
+let criteria = [
+  { id: 'c1', name: 'Performance', weight: 40 },
+  { id: 'c2', name: 'Qualité du travail', weight: 30 },
+  { id: 'c3', name: 'Esprit d\'équipe', weight: 20 },
+  { id: 'c4', name: 'Initiative', weight: 10 },
+];
+let collabs = [
+  { id: 'p1', name: 'Alice Martin' },
+  { id: 'p2', name: 'Bob Dupont' },
+  { id: 'p3', name: 'Clara Morel' },
+];
+let scores = {}; // key: `${collabId}_${critId}` → 0-10
+
+function uid() { return '_' + Math.random().toString(36).slice(2, 7); }
+function getScore(pid, cid) { return scores[pid + '_' + cid] ?? 5; }
+function setScore(pid, cid, val) { scores[pid + '_' + cid] = Math.min(10, Math.max(0, parseFloat(val) || 0)); }
+
+function weightedScore(pid) {
+  return criteria.reduce((s, c) => s + getScore(pid, c.id) * (c.weight / 100), 0);
+}
+
+// ── Tabs ───────────────────────────────────────────────────────────────
+let currentTab = 0;
+function showTab(i) {
+  currentTab = i;
+  document.querySelectorAll('section').forEach((s, j) => s.classList.toggle('active', i === j));
+  document.querySelectorAll('.tab').forEach((t, j) => t.classList.toggle('active', i === j));
+  if (i === 1) renderEvals();
+  if (i === 2) renderResults();
+}
+
+// ── Colors ─────────────────────────────────────────────────────────────
+function gradeColor(s) {
+  if (s >= 9) return '#34D399';
+  if (s >= 7.5) return '#8B85FF';
+  if (s >= 6) return '#FBBF24';
+  if (s >= 4) return '#FB923C';
+  return '#F87171';
+}
+function gradeLabel(s) {
+  if (s >= 9) return 'Exceptionnel';
+  if (s >= 7.5) return 'Excellent';
+  if (s >= 6) return 'Bien';
+  if (s >= 4) return 'Satisfaisant';
+  return 'À améliorer';
+}
+function barColor(v) { return v >= 7.5 ? '#34D399' : v >= 5 ? '#6C63FF' : '#F87171'; }
+
+// ── Header stats ───────────────────────────────────────────────────────
+function updateHeader() {
+  document.getElementById('nb-collabs').textContent = collabs.length;
+  document.getElementById('nb-crit').textContent = criteria.length;
+}
+
+// ── TAB 0 : Criteria ───────────────────────────────────────────────────
+function renderCriteria() {
+  const total = criteria.reduce((s, c) => s + c.weight, 0);
+  const pill = document.getElementById('weight-pill');
+  pill.textContent = `Total : ${total}%`;
+  pill.style.background = total === 100 ? '#34D39922' : '#F8711722';
+  pill.style.color = total === 100 ? '#34D399' : '#F87171';
+  pill.style.border = `1px solid ${total === 100 ? '#34D39944' : '#F8717144'}`;
+
+  const list = document.getElementById('crit-list');
+  list.innerHTML = '';
+  criteria.forEach(c => {
+    const d = document.createElement('div');
+    d.className = 'crit-item';
+    d.innerHTML = `
+      <input type="text" value="${esc(c.name)}" onchange="updateCritName('${c.id}', this.value)" style="flex:1; border:none; background:transparent; font-weight:600; font-size:14px; color:var(--text); outline:none"/>
+      <div class="bar-wrap" style="width:70px"><div class="bar-fill" style="width:${c.weight}%; background:var(--accent)"></div></div>
+      <input type="number" value="${c.weight}" min="0" max="100" onchange="updateCritWeight('${c.id}', this.value)" style="width:52px; min-width:52px; text-align:center"/>
+      <span class="pct">%</span>
+      <button class="btn-ghost" onclick="removeCrit('${c.id}')">✕</button>
+    `;
+    list.appendChild(d);
+  });
+  updateHeader();
+}
+
+function renderCollabs() {
+  const list = document.getElementById('collab-list');
+  list.innerHTML = '';
+  collabs.forEach(c => {
+    const d = document.createElement('div');
+    d.className = 'collab-item';
+    d.innerHTML = `
+      <div class="avatar">${c.name.charAt(0).toUpperCase()}</div>
+      <span style="flex:1; font-weight:600">${esc(c.name)}</span>
+      <button class="btn-ghost" onclick="removeCollab('${c.id}')">✕</button>
+    `;
+    list.appendChild(d);
+  });
+  updateHeader();
+}
+
+function updateCritName(id, val) { criteria.find(c => c.id === id).name = val; renderCriteria(); }
+function updateCritWeight(id, val) { criteria.find(c => c.id === id).weight = Math.max(0, Math.min(100, parseInt(val) || 0)); renderCriteria(); }
+function removeCrit(id) { criteria = criteria.filter(c => c.id !== id); renderCriteria(); }
+function addCrit() {
+  const n = document.getElementById('new-crit-name').value.trim();
+  const w = parseInt(document.getElementById('new-crit-w').value) || 0;
+  if (!n) return;
+  criteria.push({ id: uid(), name: n, weight: w });
+  document.getElementById('new-crit-name').value = '';
+  document.getElementById('new-crit-w').value = 20;
+  renderCriteria();
+}
+function removeCollab(id) { collabs = collabs.filter(c => c.id !== id); renderCollabs(); }
+function addCollab() {
+  const n = document.getElementById('new-collab-name').value.trim();
+  if (!n) return;
+  collabs.push({ id: uid(), name: n });
+  document.getElementById('new-collab-name').value = '';
+  renderCollabs();
+}
+
+// ── TAB 1 : Evaluations ────────────────────────────────────────────────
+function renderEvals() {
+  const list = document.getElementById('eval-list');
+  list.innerHTML = '';
+  collabs.forEach(p => {
+    const total = weightedScore(p.id);
+    const col = gradeColor(total);
+    const card = document.createElement('div');
+    card.className = 'card';
+    let rows = criteria.map(c => {
+      const v = getScore(p.id, c.id);
+      const bc = barColor(v);
+      return `
+        <div class="row" style="gap:10px">
+          <div class="row-label">
+            <div class="crit-name">${esc(c.name)}</div>
+            <div class="crit-weight">Poids : ${c.weight}%</div>
+          </div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:${v*10}%; background:${bc}"></div></div>
+          <input type="number" min="0" max="10" step="0.5" value="${v}"
+            onchange="setScore('${p.id}','${c.id}',this.value); updateCollab('${p.id}')"
+            style="width:54px; min-width:54px"/>
+          <span class="pct">/10</span>
+        </div>`;
+    }).join('');
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="avatar" style="background:${col}33; border:2px solid ${col}66; color:${col}">${p.name.charAt(0).toUpperCase()}</div>
+        <div>
+          <div class="name">${esc(p.name)}</div>
+          <div class="sub">Note pondérée : <strong id="score-${p.id}" style="color:${col}">${total.toFixed(2)}</strong>/10</div>
+        </div>
+        <div style="margin-left:auto">
+          <span class="badge" id="grade-${p.id}" style="background:${col}22; color:${col}; border:1px solid ${col}44">${gradeLabel(total)}</span>
+        </div>
+      </div>
+      <div class="card-body">${rows}</div>`;
+    list.appendChild(card);
+  });
+}
+
+function updateCollab(pid) {
+  const total = weightedScore(pid);
+  const col = gradeColor(total);
+  const scoreEl = document.getElementById('score-' + pid);
+  const gradeEl = document.getElementById('grade-' + pid);
+  if (scoreEl) { scoreEl.textContent = total.toFixed(2); scoreEl.style.color = col; }
+  if (gradeEl) { gradeEl.textContent = gradeLabel(total); gradeEl.style.color = col; gradeEl.style.background = col + '22'; gradeEl.style.borderColor = col + '44'; }
+}
+
+// ── TAB 2 : Results ────────────────────────────────────────────────────
+function renderResults() {
+  const envelope = parseFloat(document.getElementById('envelope').value) || 0;
+  const results = collabs.map(p => ({ ...p, score: weightedScore(p.id) }));
+  const totalScore = results.reduce((s, r) => s + r.score, 0);
+  const sorted = [...results].sort((a, b) => b.score - a.score);
+  const medals = ['🥇', '🥈', '🥉'];
+
+  const list = document.getElementById('results-list');
+  list.innerHTML = '';
+  sorted.forEach((r, i) => {
+    const col = gradeColor(r.score);
+    const share = totalScore > 0 ? (r.score / totalScore) * 100 : 0;
+    const bonus = totalScore > 0 ? (r.score / totalScore) * envelope : 0;
+    const d = document.createElement('div');
+    d.className = 'result-card';
+    d.style.background = i === 0 ? 'linear-gradient(120deg, var(--card) 60%, #6C63FF18)' : 'var(--card)';
+    d.style.borderColor = i === 0 ? '#6C63FF66' : 'var(--border)';
+    d.innerHTML = `
+      <div style="font-size:22px; min-width:28px; text-align:center">${medals[i] || '#'+(i+1)}</div>
+      <div class="avatar" style="background:${col}33; border:2px solid ${col}55; color:${col}">${r.name.charAt(0).toUpperCase()}</div>
+      <div style="flex:1; min-width:80px">
+        <div style="font-weight:700; font-size:15px">${esc(r.name)}</div>
+        <div class="bar-wrap" style="margin-top:6px"><div class="bar-fill" style="width:${r.score*10}%; background:${col}"></div></div>
+      </div>
+      <div style="text-align:center">
+        <div class="score-big" style="color:${col}">${r.score.toFixed(2)}</div>
+        <div class="score-label">/10</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-weight:700; font-size:14px; color:var(--muted)">${share.toFixed(1)}%</div>
+        <div class="score-label">part</div>
+      </div>
+      <div class="bonus-box">
+        <div class="bonus-amount">${fmt(bonus)} €</div>
+        <div class="score-label">bonus</div>
+      </div>`;
+    list.appendChild(d);
+  });
+
+  const avg = collabs.length > 0 ? envelope / collabs.length : 0;
+  const minB = sorted.length > 0 ? (totalScore > 0 ? (sorted[sorted.length-1].score/totalScore)*envelope : 0) : 0;
+  const maxB = sorted.length > 0 ? (totalScore > 0 ? (sorted[0].score/totalScore)*envelope : 0) : 0;
+  document.getElementById('summary').innerHTML = `
+    <div>Total distribué : <strong>${fmt(envelope)} €</strong> sur ${collabs.length} collaborateurs</div>
+    <div>Bonus moyen : <strong>${fmt(avg)} €</strong></div>
+    <div>Min / Max : <strong>${fmt(minB)} € – ${fmt(maxB)} €</strong></div>`;
+}
+
+function fmt(n) { return Math.round(n).toLocaleString('fr-FR'); }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Init ───────────────────────────────────────────────────────────────
+renderCriteria();
+renderCollabs();
+
+// Service worker
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
