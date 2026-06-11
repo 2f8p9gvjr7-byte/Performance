@@ -543,7 +543,89 @@ function renderRes(){
     ${useMM?'<div style="font-size:12px;color:var(--faint)">✓ Min/max activés</div>':''}`;
 }
 
+// ── LocalStorage ──────────────────────────────────────
+function save(){
+  try {
+    localStorage.setItem('eb_crit',   JSON.stringify(crit));
+    localStorage.setItem('eb_coll',   JSON.stringify(coll));
+    localStorage.setItem('eb_scores', JSON.stringify(scores));
+    localStorage.setItem('eb_useCoef',JSON.stringify(useCoef));
+    localStorage.setItem('eb_useMM',  JSON.stringify(useMM));
+    const env = document.getElementById('env');
+    if(env) localStorage.setItem('eb_env', env.value);
+    const bmin = document.getElementById('bmin');
+    const bmax = document.getElementById('bmax');
+    if(bmin) localStorage.setItem('eb_bmin', bmin.value);
+    if(bmax) localStorage.setItem('eb_bmax', bmax.value);
+    // coefficients
+    ['c0','c1','c2','c3','c4'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) localStorage.setItem('eb_'+id, el.value);
+    });
+  } catch(e){}
+}
+
+function load(){
+  try {
+    const sc = localStorage.getItem('eb_crit');
+    const sp = localStorage.getItem('eb_coll');
+    const ss = localStorage.getItem('eb_scores');
+    if(sc) crit   = JSON.parse(sc);
+    if(sp) coll   = JSON.parse(sp);
+    if(ss) scores = JSON.parse(ss);
+    useCoef = JSON.parse(localStorage.getItem('eb_useCoef')||'false');
+    useMM   = JSON.parse(localStorage.getItem('eb_useMM')||'false');
+  } catch(e){}
+}
+
+function restoreUI(){
+  // Toggles
+  if(useCoef){
+    document.getElementById('tog-coef').classList.add('on');
+    document.getElementById('coef-panel').style.display='block';
+  }
+  if(useMM){
+    document.getElementById('tog-mm').classList.add('on');
+    document.getElementById('mm-panel').style.display='flex';
+  }
+  // Envelope
+  const envVal = localStorage.getItem('eb_env');
+  if(envVal) document.getElementById('env').value = envVal;
+  // Min/max
+  const bminVal = localStorage.getItem('eb_bmin');
+  const bmaxVal = localStorage.getItem('eb_bmax');
+  if(bminVal) document.getElementById('bmin').value = bminVal;
+  if(bmaxVal) document.getElementById('bmax').value = bmaxVal;
+  // Coefficients
+  ['c0','c1','c2','c3','c4'].forEach(id=>{
+    const v = localStorage.getItem('eb_'+id);
+    const el = document.getElementById(id);
+    if(v && el) el.value = v;
+  });
+}
+
+// Patch all mutating functions to auto-save
+const _rConfig = rConfig;
+rConfig = function(){ _rConfig(); save(); };
+const _updS = updS;
+updS = function(pid,cid,val){ _updS(pid,cid,val); save(); };
+const _togCoef = togCoef;
+togCoef = function(){ _togCoef(); save(); };
+const _togMM = togMM;
+togMM = function(){ _togMM(); save(); };
+
+// Save on env/min/max changes too
+document.getElementById('env').addEventListener('change', save);
+document.getElementById('bmin').addEventListener('change', save);
+document.getElementById('bmax').addEventListener('change', save);
+['c0','c1','c2','c3','c4'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', save);
+});
+
 // ── Init ──────────────────────────────────────────────
+load();
+restoreUI();
+rConfig();
 rWtot();
 if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
