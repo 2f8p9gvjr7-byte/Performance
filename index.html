@@ -57,8 +57,8 @@
     .pages { flex: 1; overflow: hidden; position: relative; }
     .page {
       display: none; flex-direction: column; gap: 12px;
-      position: absolute; inset: 0; overflow-y: auto;
-      padding: 16px 16px 32px;
+      position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden;
+      padding: 12px 12px 32px;
     }
     .page.on { display: flex; }
 
@@ -71,9 +71,9 @@
 
     /* ── ITEM ROW ── */
     .item {
-      display: flex; align-items: center; gap: 8px;
+      display: flex; align-items: center; gap: 6px;
       background: var(--card2); border: 1px solid var(--border);
-      border-radius: 12px; padding: 11px 13px; margin-bottom: 8px;
+      border-radius: 12px; padding: 10px 10px; margin-bottom: 8px;
     }
     .item input[type=text] {
       flex: 1; background: transparent; border: none; color: var(--text);
@@ -81,22 +81,23 @@
     }
     .item input[type=text]::placeholder { color: var(--faint); }
     .num-in {
-      width: 54px; background: var(--card); border: 1px solid var(--border);
+      width: 46px; background: var(--card); border: 1px solid var(--border);
       border-radius: 8px; color: var(--accent); font-size: 14px; font-weight: 700;
-      text-align: center; padding: 5px 3px; outline: none;
+      text-align: center; padding: 5px 2px; outline: none;
     }
     .pct { color: var(--muted); font-size: 13px; min-width: 14px; }
     .del { background: none; border: none; color: var(--faint); font-size: 20px; cursor: pointer; padding: 0 2px; line-height: 1; }
 
     /* ── ADD ROW ── */
     .add-row {
-      display: flex; align-items: center; gap: 8px;
-      border: 1.5px dashed var(--border); border-radius: 12px; padding: 10px 13px;
+      display: flex; align-items: center; gap: 6px;
+      border: 1.5px dashed var(--border); border-radius: 12px; padding: 10px 10px;
     }
     .add-row input[type=text] { flex: 1; background: transparent; border: none; color: var(--text); font-size: 15px; outline: none; }
     .add-row input[type=text]::placeholder { color: var(--faint); }
     .add-row .num-in { background: var(--card2); }
-    .btn-sm { background: var(--accent); border: none; color: #000; border-radius: 8px; padding: 7px 14px; font-weight: 800; font-size: 13px; cursor: pointer; }
+    .btn-sm { background: var(--accent); border: none; color: #000; border-radius: 8px; padding: 7px 10px; font-weight: 800; font-size: 13px; cursor: pointer; min-width: 36px; }
+    .add-full-btn { width: 100%; padding: 13px; border-radius: 12px; border: none; background: var(--accent); color: #000; font-size: 15px; font-weight: 800; cursor: pointer; }
 
     /* ── WEIGHT STATUS ── */
     .wtot {
@@ -220,20 +221,22 @@
     <div id="sc-list"></div>
     <div class="add-row">
       <input type="text" id="nc-name" placeholder="Nom du critère…"
-        onkeydown="if(event.key==='Enter')aC()"/>
+        onkeydown="if(event.key==='Enter')aC()"
+        style="flex:1"/>
       <input type="number" class="num-in" id="nc-w" value="20" min="0" max="100"/>
       <span class="pct">%</span>
-      <button class="btn-sm" onclick="aC()">+</button>
     </div>
+    <button class="add-full-btn" onclick="aC()">+ Ajouter ce critère</button>
     <div class="wtot" id="wtot"></div>
 
     <div class="stitle" style="margin-top:8px">Collaborateurs</div>
     <div id="sp-list"></div>
     <div class="add-row">
       <input type="text" id="np-name" placeholder="Prénom Nom…"
-        onkeydown="if(event.key==='Enter')aP()"/>
-      <button class="btn-sm" onclick="aP()">+</button>
+        onkeydown="if(event.key==='Enter')aP()"
+        style="flex:1"/>
     </div>
+    <button class="add-full-btn" onclick="aP()">+ Ajouter ce collaborateur</button>
 
     <div class="stitle" style="margin-top:8px">Options</div>
 
