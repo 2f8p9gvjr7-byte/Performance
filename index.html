@@ -6,39 +6,54 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="Éval & Bonus"/>
-  <meta name="theme-color" content="#1C1C1E"/>
+  <meta name="theme-color" content="#0D1B3E"/>
   <link rel="manifest" href="manifest.json"/>
   <link rel="apple-touch-icon" href="icon-192.png"/>
   <title>Évaluation & Bonus</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #0F1117; --card: #1A1D27; --card2: #22263A; --border: #2E3350;
-      --accent: #6C63FF; --green: #34D399; --red: #F87171; --amber: #FBBF24;
-      --text: #E8EAFF; --muted: #8B90BB; --faint: #4A4F72;
+      --bg:      #0D1B3E;
+      --card:    #152040;
+      --card2:   #1C2D56;
+      --border:  #2A3F6F;
+      --accent:  #FFA500;
+      --accentD: #CC8400;
+      --green:   #2ECC71;
+      --red:     #E74C3C;
+      --amber:   #F39C12;
+      --text:    #E8F0FF;
+      --muted:   #8BA0CC;
+      --faint:   #3A5080;
     }
-    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; }
+    html, body {
+      height: 100%; background: var(--bg); color: var(--text);
+      font-family: -apple-system, sans-serif; font-size: 16px;
+    }
     body { display: flex; flex-direction: column; overflow: hidden; padding-bottom: env(safe-area-inset-bottom); }
 
-    /* HEADER */
+    /* ── HEADER ── */
     .hdr {
-      background: linear-gradient(135deg, #1A1D27 0%, #22263A 100%); border-bottom: 1px solid var(--border);
-      padding: 14px 16px 10px; flex-shrink: 0;
+      background: var(--card);
+      border-bottom: 2px solid var(--accent);
+      padding: 14px 16px 10px;
       padding-top: calc(14px + env(safe-area-inset-top));
+      flex-shrink: 0;
     }
-    .hdr-title { font-weight: 800; font-size: 18px; color: var(--text); }
-    .hdr-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .hdr-title { font-weight: 800; font-size: 18px; color: var(--accent); letter-spacing: 0.3px; }
+    .hdr-sub   { color: var(--muted); font-size: 12px; margin-top: 2px; }
 
-    /* TABS */
+    /* ── TABS ── */
     .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .tab {
       flex: 1; padding: 11px 4px; font-size: 11px; font-weight: 700;
       border: none; background: transparent; color: var(--muted); cursor: pointer;
-      border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      border-bottom: 2px solid transparent; transition: color .2s, border-color .2s;
+      white-space: nowrap;
     }
-    .tab.on { color: #8B85FF; border-bottom-color: #8B85FF; }
+    .tab.on { color: var(--accent); border-bottom-color: var(--accent); }
 
-    /* PAGES */
+    /* ── PAGES ── */
     .pages { flex: 1; overflow: hidden; position: relative; }
     .page {
       display: none; flex-direction: column; gap: 12px;
@@ -47,14 +62,18 @@
     }
     .page.on { display: flex; }
 
-    /* SECTION TITLE */
-    .stitle { font-size: 11px; font-weight: 700; color: var(--accentL, #8B85FF); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; margin-top: 4px; }
+    /* ── SECTION TITLE ── */
+    .stitle {
+      font-size: 11px; font-weight: 700; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 2px; margin-top: 4px;
+    }
 
-    /* ITEM ROW */
+    /* ── ITEM ROW ── */
     .item {
       display: flex; align-items: center; gap: 8px;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 11px 13px;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 11px 13px; margin-bottom: 8px;
     }
     .item input[type=text] {
       flex: 1; background: transparent; border: none; color: var(--text);
@@ -62,35 +81,36 @@
     }
     .item input[type=text]::placeholder { color: var(--faint); }
     .num-in {
-      width: 54px; background: var(--card2); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--text); font-size: 14px; font-weight: 700;
+      width: 54px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--accent); font-size: 14px; font-weight: 700;
       text-align: center; padding: 5px 3px; outline: none;
     }
     .pct { color: var(--muted); font-size: 13px; min-width: 14px; }
     .del { background: none; border: none; color: var(--faint); font-size: 20px; cursor: pointer; padding: 0 2px; line-height: 1; }
 
-    /* ADD ROW */
+    /* ── ADD ROW ── */
     .add-row {
       display: flex; align-items: center; gap: 8px;
       border: 1.5px dashed var(--border); border-radius: 12px; padding: 10px 13px;
     }
     .add-row input[type=text] { flex: 1; background: transparent; border: none; color: var(--text); font-size: 15px; outline: none; }
     .add-row input[type=text]::placeholder { color: var(--faint); }
-    .btn-sm { background: var(--accent); border: none; color: #fff; border-radius: 8px; padding: 7px 14px; font-weight: 700; font-size: 13px; cursor: pointer; }
+    .add-row .num-in { background: var(--card2); }
+    .btn-sm { background: var(--accent); border: none; color: #000; border-radius: 8px; padding: 7px 14px; font-weight: 800; font-size: 13px; cursor: pointer; }
 
-    /* WEIGHT STATUS */
+    /* ── WEIGHT STATUS ── */
     .wtot {
       display: flex; justify-content: space-between;
-      padding: 9px 13px; border-radius: 10px; font-size: 13px; font-weight: 600;
+      padding: 9px 13px; border-radius: 10px; font-size: 13px; font-weight: 700;
     }
 
-    /* TOGGLE */
+    /* ── TOGGLE ── */
     .tog-row {
       display: flex; align-items: center; justify-content: space-between;
-      background: var(--card); border: 1px solid var(--border);
+      background: var(--card2); border: 1px solid var(--border);
       border-radius: 12px; padding: 12px 14px;
     }
-    .tog-lbl { font-size: 14px; font-weight: 600; }
+    .tog-lbl { font-size: 14px; font-weight: 600; color: var(--text); }
     .tog-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
     .toggle {
       width: 48px; height: 28px; border-radius: 14px; border: none; cursor: pointer;
@@ -103,58 +123,77 @@
     }
     .toggle.on::after { left: 23px; }
 
-    /* COEF TABLE */
-    .coef-tbl { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    /* ── COEF TABLE ── */
+    .coef-tbl { background: var(--card2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
     .coef-r { display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--border); gap: 10px; }
     .coef-r:last-child { border-bottom: none; }
     .coef-l { flex: 1; font-size: 14px; color: var(--muted); }
 
-    /* MIN MAX */
+    /* ── MIN MAX ── */
     .mm-row { display: flex; gap: 10px; }
-    .mm-box { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 11px 13px; }
-    .mm-box label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
-    .mm-box input { width: 100%; background: var(--card2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 16px; font-weight: 800; text-align: center; padding: 7px 4px; outline: none; }
+    .mm-box { flex: 1; background: var(--card2); border: 1px solid var(--border); border-radius: 12px; padding: 11px 13px; }
+    .mm-box label { display: block; font-size: 11px; font-weight: 700; color: var(--accent); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.6px; }
+    .mm-box input { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--accent); font-size: 16px; font-weight: 800; text-align: center; padding: 7px 4px; outline: none; }
 
-    /* EVAL CARDS */
-    .ecard { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
-    .ecard-hdr { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--card2); border-bottom: 1px solid var(--border); }
+    /* ── EVAL CARDS ── */
+    .ecard { background: var(--card2); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .ecard-hdr { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--card); border-bottom: 1px solid var(--border); }
     .av { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; flex-shrink: 0; }
     .ecard-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
     .crow { display: flex; align-items: center; gap: 8px; }
     .crow-lbl { flex: 1; }
-    .crow-name { font-size: 13px; font-weight: 600; }
+    .crow-name { font-size: 13px; font-weight: 600; color: var(--text); }
     .crow-w { font-size: 11px; color: var(--muted); }
     .bar { height: 4px; background: var(--faint); border-radius: 4px; margin-top: 4px; overflow: hidden; }
     .bar-f { height: 100%; border-radius: 4px; transition: width .3s; }
-    input.sc { width: 52px; background: var(--card2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; font-weight: 700; text-align: center; padding: 5px 3px; outline: none; }
+    input.sc {
+      width: 52px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--accent); font-size: 14px; font-weight: 700;
+      text-align: center; padding: 5px 3px; outline: none;
+    }
     .sl { color: var(--muted); font-size: 12px; }
 
-    /* BONUS PAGE */
-    .big-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
-    .big-card label { display: block; font-size: 11px; font-weight: 700; color: #8B85FF; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-    .env-in-wrap { display: flex; align-items: center; gap: 8px; }
-    .env-in { flex: 1; background: var(--card2); border: 2px solid var(--accent); border-radius: 10px; color: var(--text); font-size: 26px; font-weight: 800; text-align: right; padding: 10px 14px; outline: none; }
-    .eur { font-size: 22px; font-weight: 800; color: var(--muted); }
+    /* ── BONUS PAGE ── */
+    .big-card { background: var(--card2); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
+    .big-card label { display: block; font-size: 11px; font-weight: 700; color: var(--accent); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+    .env-in-wrap { display: flex; align-items: center; gap: 10px; }
+    .env-in {
+      flex: 1; background: var(--card); border: 2px solid var(--accent);
+      border-radius: 10px; color: var(--accent); font-size: 28px; font-weight: 800;
+      text-align: right; padding: 10px 14px; outline: none;
+    }
+    .eur { font-size: 22px; font-weight: 800; color: var(--accent); }
 
-    .rcard { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 13px 14px; display: flex; align-items: center; gap: 11px; flex-wrap: wrap; }
-    .rcard.top { border-color: #6C63FF66; background: linear-gradient(120deg, var(--card) 55%, #6C63FF12); }
+    /* ── RESULT CARDS ── */
+    .rcard {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 13px 14px;
+      display: flex; align-items: center; gap: 11px; flex-wrap: wrap;
+    }
+    .rcard.top { border-color: var(--accent); background: linear-gradient(120deg, var(--card2) 55%, #FFA50015); }
     .medal { font-size: 22px; min-width: 26px; text-align: center; }
-    .rname { font-weight: 700; font-size: 15px; }
+    .rname { font-weight: 700; font-size: 15px; color: var(--text); }
     .rscore-v { font-size: 20px; font-weight: 800; }
     .rscore-d { color: var(--muted); font-size: 11px; text-align: center; }
-    .rcoef-v { font-size: 13px; font-weight: 700; color: var(--muted); text-align: center; }
-    .rcoef-d { font-size: 11px; color: var(--faint); text-align: center; }
-    .rshare { font-size: 13px; font-weight: 700; color: var(--muted); text-align: center; }
-    .bonus-box { background: #34D39918; border: 1px solid #34D39950; border-radius: 10px; padding: 9px 14px; text-align: center; margin-left: auto; }
+    .rcoef-v  { font-size: 13px; font-weight: 700; color: var(--muted); text-align: center; }
+    .rcoef-d  { font-size: 11px; color: var(--faint); text-align: center; }
+    .rshare   { font-size: 13px; font-weight: 700; color: var(--muted); text-align: center; min-width: 38px; }
+    .bonus-box {
+      background: #2ECC7118; border: 1px solid #2ECC7150;
+      border-radius: 10px; padding: 9px 14px; text-align: center; margin-left: auto;
+    }
     .bonus-v { color: var(--green); font-weight: 800; font-size: 18px; }
     .bonus-l { color: var(--faint); font-size: 11px; margin-top: 1px; }
 
-    .sumbox { background: var(--card2); border: 1px solid var(--border); border-radius: 12px; padding: 13px 15px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--muted); }
-    .sumbox strong { color: var(--text); }
+    .sumbox {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 13px 15px;
+      display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--muted);
+    }
+    .sumbox strong { color: var(--accent); }
+
     .badge { display: inline-block; border-radius: 20px; padding: 2px 9px; font-size: 11px; font-weight: 700; }
     .info { color: var(--muted); font-size: 13px; }
-
-    /* EMPTY STATE */
     .empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
     .empty .eico { font-size: 40px; margin-bottom: 10px; }
   </style>
@@ -167,22 +206,22 @@
 </div>
 
 <div class="tabs">
-  <button class="tab on"  onclick="showTab(0)">① Config</button>
-  <button class="tab"     onclick="showTab(1)">② Notes</button>
-  <button class="tab"     onclick="showTab(2)">③ Bonus</button>
+  <button class="tab on" onclick="showTab(0)">① Config</button>
+  <button class="tab"    onclick="showTab(1)">② Notes</button>
+  <button class="tab"    onclick="showTab(2)">③ Bonus</button>
 </div>
 
 <div class="pages">
 
-  <!-- ══════════════════════════════════
-       TAB 0 — CONFIG
-  ══════════════════════════════════ -->
+  <!-- ══════════ TAB 0 — CONFIG ══════════ -->
   <div class="page on" id="p0">
 
     <div class="stitle">Critères d'évaluation</div>
     <div id="sc-list"></div>
     <div class="add-row">
-      <input type="text" id="nc-name" placeholder="Nom du critère…" onkeydown="if(event.key==='Enter')aC()" onblur="if(this.value.trim())aC()"/>
+      <input type="text" id="nc-name" placeholder="Nom du critère…"
+        onkeydown="if(event.key==='Enter')aC()"
+        onblur="if(this.value.trim())aC()"/>
       <input type="number" class="num-in" id="nc-w" value="20" min="0" max="100"/>
       <span class="pct">%</span>
       <button class="btn-sm" onclick="aC()">+</button>
@@ -192,7 +231,9 @@
     <div class="stitle" style="margin-top:8px">Collaborateurs</div>
     <div id="sp-list"></div>
     <div class="add-row">
-      <input type="text" id="np-name" placeholder="Prénom Nom…" onkeydown="if(event.key==='Enter')aP()" onblur="if(this.value.trim())aP()"/>
+      <input type="text" id="np-name" placeholder="Prénom Nom…"
+        onkeydown="if(event.key==='Enter')aP()"
+        onblur="if(this.value.trim())aP()"/>
       <button class="btn-sm" onclick="aP()">+</button>
     </div>
 
@@ -207,9 +248,9 @@
     </div>
     <div id="coef-panel" style="display:none">
       <div class="coef-tbl">
-        <div class="coef-r"><span class="coef-l">Note &lt; 6</span><input type="number" class="num-in" id="c0" value="0" min="0" max="5" step="0.1"/><span class="pct">×</span></div>
+        <div class="coef-r"><span class="coef-l">Note &lt; 6</span><input type="number" class="num-in" id="c0" value="0"   min="0" max="5" step="0.1"/><span class="pct">×</span></div>
         <div class="coef-r"><span class="coef-l">Note 6 – 7</span><input type="number" class="num-in" id="c1" value="0.8" min="0" max="5" step="0.1"/><span class="pct">×</span></div>
-        <div class="coef-r"><span class="coef-l">Note 7 – 8</span><input type="number" class="num-in" id="c2" value="1" min="0" max="5" step="0.1"/><span class="pct">×</span></div>
+        <div class="coef-r"><span class="coef-l">Note 7 – 8</span><input type="number" class="num-in" id="c2" value="1"   min="0" max="5" step="0.1"/><span class="pct">×</span></div>
         <div class="coef-r"><span class="coef-l">Note 8 – 9</span><input type="number" class="num-in" id="c3" value="1.3" min="0" max="5" step="0.1"/><span class="pct">×</span></div>
         <div class="coef-r"><span class="coef-l">Note &gt; 9</span><input type="number" class="num-in" id="c4" value="1.6" min="0" max="5" step="0.1"/><span class="pct">×</span></div>
       </div>
@@ -224,24 +265,20 @@
     </div>
     <div id="mm-panel" style="display:none">
       <div class="mm-row">
-        <div class="mm-box"><label>Minimum (€)</label><input type="number" id="bmin" value="500" min="0" onchange="renderRes()"/></div>
+        <div class="mm-box"><label>Minimum (€)</label><input type="number" id="bmin" value="500"  min="0" onchange="renderRes()"/></div>
         <div class="mm-box"><label>Maximum (€)</label><input type="number" id="bmax" value="5000" min="0" onchange="renderRes()"/></div>
       </div>
     </div>
 
   </div>
 
-  <!-- ══════════════════════════════════
-       TAB 1 — ÉVALUATIONS
-  ══════════════════════════════════ -->
+  <!-- ══════════ TAB 1 — NOTES ══════════ -->
   <div class="page" id="p1">
     <p class="info">Notez chaque collaborateur de 0 à 10 sur chaque critère.</p>
     <div id="elist" style="display:flex;flex-direction:column;gap:12px"></div>
   </div>
 
-  <!-- ══════════════════════════════════
-       TAB 2 — BONUS
-  ══════════════════════════════════ -->
+  <!-- ══════════ TAB 2 — BONUS ══════════ -->
   <div class="page" id="p2">
 
     <div class="big-card">
@@ -257,8 +294,7 @@
     <div class="sumbox" id="sumbox"></div>
 
   </div>
-
-</div><!-- /pages -->
+</div>
 
 <script>
 // ── State ─────────────────────────────────────────────
@@ -271,9 +307,21 @@ function fmt(n){ return Math.round(n).toLocaleString('fr-FR'); }
 function fmtD(n){ return n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 
 // ── Grade ─────────────────────────────────────────────
-function gCol(s){ return s>=9?'#34D399':s>=7.5?'#8B85FF':s>=6?'#FBBF24':s>=4?'#FB923C':'#F87171'; }
-function gLbl(s){ return s>=9?'Exceptionnel':s>=7.5?'Excellent':s>=6?'Bien':s>=4?'Satisfaisant':'À améliorer'; }
-function bCol(v){ return v>=7.5?'#34D399':v>=5?'#6C63FF':'#F87171'; }
+function gCol(s){
+  if(s>=9)   return '#2ECC71';
+  if(s>=7.5) return '#FFA500';
+  if(s>=6)   return '#F39C12';
+  if(s>=4)   return '#E67E22';
+  return '#E74C3C';
+}
+function gLbl(s){
+  if(s>=9)   return 'Exceptionnel';
+  if(s>=7.5) return 'Excellent';
+  if(s>=6)   return 'Bien';
+  if(s>=4)   return 'Satisfaisant';
+  return 'À améliorer';
+}
+function bCol(v){ return v>=7.5?'#2ECC71':v>=5?'#FFA500':'#E74C3C'; }
 function getS(pid,cid){ return scores[pid+'_'+cid]??5; }
 function wScore(pid){ return crit.reduce((s,c)=>s+getS(pid,c.id)*(c.weight/100),0); }
 function coefFor(s){
@@ -326,12 +374,11 @@ function dC(id){ crit=crit.filter(c=>c.id!==id); rConfig(); }
 function dP(id){ coll=coll.filter(p=>p.id!==id); rConfig(); }
 
 function rConfig(){
-  // Critères
   const cl=document.getElementById('sc-list');
   cl.innerHTML='';
   crit.forEach(c=>{
     const d=document.createElement('div');
-    d.className='item'; d.style.marginBottom='8px';
+    d.className='item';
     d.innerHTML=`
       <input type="text" value="${esc(c.name)}" placeholder="Critère"
         oninput="crit.find(x=>x.id==='${c.id}').name=this.value;updHdr()"/>
@@ -342,12 +389,11 @@ function rConfig(){
     cl.appendChild(d);
   });
 
-  // Collabs
   const pl=document.getElementById('sp-list');
   pl.innerHTML='';
   coll.forEach(p=>{
     const d=document.createElement('div');
-    d.className='item'; d.style.marginBottom='8px';
+    d.className='item';
     d.innerHTML=`
       <input type="text" value="${esc(p.name)}" placeholder="Nom"
         oninput="coll.find(x=>x.id==='${p.id}').name=this.value;updHdr()"/>
@@ -355,8 +401,7 @@ function rConfig(){
     pl.appendChild(d);
   });
 
-  rWtot();
-  updHdr();
+  rWtot(); updHdr();
 }
 
 function rWtot(){
@@ -364,16 +409,17 @@ function rWtot(){
   const ok=tot===100;
   const el=document.getElementById('wtot');
   el.textContent=`Total pondérations : ${tot} / 100 %`;
-  el.style.background=ok?'#34D39918':'#FF453A18';
-  el.style.color=ok?'#30D158':'#FF453A';
-  el.style.border=`1px solid ${ok?'#34D39940':'#F8717140'}`;
+  el.style.background=ok?'#2ECC7118':'#E74C3C18';
+  el.style.color=ok?'#2ECC71':'#E74C3C';
+  el.style.border=`1px solid ${ok?'#2ECC7140':'#E74C3C40'}`;
 }
 
 function updHdr(){
   const nc=crit.filter(c=>c.name.trim()).length;
   const np=coll.filter(p=>p.name.trim()).length;
   document.getElementById('hdr-sub').textContent=
-    nc>0||np>0 ? `${nc} critère${nc>1?'s':''} · ${np} collaborateur${np>1?'s':''}` : 'Configurez puis évaluez vos collaborateurs';
+    nc>0||np>0?`${nc} critère${nc>1?'s':''} · ${np} collaborateur${np>1?'s':''}`:
+    'Configurez puis évaluez vos collaborateurs';
 }
 
 // ── Evals ─────────────────────────────────────────────
@@ -381,7 +427,7 @@ function renderEvals(){
   const el=document.getElementById('elist');
   el.innerHTML='';
   if(coll.length===0||crit.length===0){
-    el.innerHTML='<div class="empty"><div class="eico">⚙️</div>Configurez d\'abord des critères et des collaborateurs dans l\'onglet ① Config</div>';
+    el.innerHTML='<div class="empty"><div class="eico">⚙️</div>Configurez d\'abord des critères et des collaborateurs dans ① Config</div>';
     return;
   }
   coll.forEach(p=>{
@@ -404,9 +450,9 @@ function renderEvals(){
     }).join('');
     card.innerHTML=`
       <div class="ecard-hdr">
-        <div class="av" style="background:${col}33;border:2px solid ${col}55;color:${col}">${p.name.charAt(0).toUpperCase()}</div>
+        <div class="av" style="background:${col}33;border:2px solid ${col}66;color:${col}">${p.name.charAt(0).toUpperCase()}</div>
         <div style="flex:1">
-          <div style="font-weight:700;font-size:15px">${esc(p.name)}</div>
+          <div style="font-weight:700;font-size:15px;color:var(--text)">${esc(p.name)}</div>
           <div style="color:var(--muted);font-size:12px;margin-top:2px">
             Note pondérée : <strong id="st-${p.id}" style="color:${col}">${fmtD(tot)}</strong>/10
           </div>
@@ -436,9 +482,8 @@ function renderRes(){
   const rl=document.getElementById('rlist');
   const sb=document.getElementById('sumbox');
   if(coll.length===0||crit.length===0){
-    rl.innerHTML='<div class="empty"><div class="eico">⚙️</div>Configurez d\'abord des critères et des collaborateurs dans l\'onglet ① Config</div>';
-    sb.innerHTML='';
-    return;
+    rl.innerHTML='<div class="empty"><div class="eico">⚙️</div>Configurez d\'abord des critères et des collaborateurs dans ① Config</div>';
+    sb.innerHTML=''; return;
   }
   const env=parseFloat(document.getElementById('env').value)||0;
   const bmin=useMM?parseFloat(document.getElementById('bmin').value)||0:0;
@@ -450,7 +495,6 @@ function renderRes(){
     return {...p,score:s,coef,adj:s*coef};
   });
   const totAdj=res.reduce((s,r)=>s+r.adj,0);
-
   let bonuses=res.map(r=>({...r,bonusRaw:totAdj>0?(r.adj/totAdj)*env:0}));
   if(useMM){
     bonuses=bonuses.map(r=>({...r,bonus:Math.min(bmax,Math.max(bmin,r.bonusRaw))}));
@@ -470,7 +514,7 @@ function renderRes(){
     d.className='rcard'+(i===0?' top':'');
     d.innerHTML=`
       <div class="medal">${medals[i]||'#'+(i+1)}</div>
-      <div class="av" style="background:${col}33;border:2px solid ${col}55;color:${col};width:34px;height:34px;font-size:14px">${r.name.charAt(0).toUpperCase()}</div>
+      <div class="av" style="background:${col}33;border:2px solid ${col}66;color:${col};width:34px;height:34px;font-size:14px">${r.name.charAt(0).toUpperCase()}</div>
       <div style="flex:1;min-width:70px">
         <div class="rname">${esc(r.name)}</div>
         <div class="bar" style="margin-top:5px"><div class="bar-f" style="width:${r.score*10}%;background:${col}"></div></div>
@@ -491,13 +535,12 @@ function renderRes(){
   const mn=Math.min(...sorted.map(r=>r.bonus));
   const mx=Math.max(...sorted.map(r=>r.bonus));
   const avg=coll.length>0?env/coll.length:0;
-  const totDistrib=sorted.reduce((s,r)=>s+r.bonus,0);
   sb.innerHTML=`
-    <div>Enveloppe : <strong>${fmt(env)} €</strong> · Total distribué : <strong>${fmt(totDistrib)} €</strong></div>
+    <div>Enveloppe : <strong>${fmt(env)} €</strong> · Total distribué : <strong>${fmt(sorted.reduce((s,r)=>s+r.bonus,0))} €</strong></div>
     <div>Bonus moyen : <strong>${fmt(avg)} €</strong></div>
     <div>Fourchette : <strong>${fmt(mn)} € – ${fmt(mx)} €</strong></div>
-    ${useCoef?'<div style="color:var(--faint);font-size:12px">✓ Coefficients par tranche activés</div>':''}
-    ${useMM?'<div style="color:var(--faint);font-size:12px">✓ Min/max activés</div>':''}`;
+    ${useCoef?'<div style="font-size:12px;color:var(--faint)">✓ Coefficients par tranche activés</div>':''}
+    ${useMM?'<div style="font-size:12px;color:var(--faint)">✓ Min/max activés</div>':''}`;
 }
 
 // ── Init ──────────────────────────────────────────────
