@@ -32,9 +32,9 @@
     /* TABS */
     .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .tab {
-      flex: 1; padding: 11px 4px; font-size: 12px; font-weight: 700;
+      flex: 1; padding: 11px 4px; font-size: 11px; font-weight: 700;
       border: none; background: transparent; color: var(--muted); cursor: pointer;
-      border-bottom: 2px solid transparent; transition: color .2s, border-color .2s;
+      border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .tab.on { color: var(--accent); border-bottom-color: var(--accent); }
 
@@ -168,7 +168,7 @@
 
 <div class="tabs">
   <button class="tab on"  onclick="showTab(0)">① Config</button>
-  <button class="tab"     onclick="showTab(1)">② Évaluations</button>
+  <button class="tab"     onclick="showTab(1)">② Notes</button>
   <button class="tab"     onclick="showTab(2)">③ Bonus</button>
 </div>
 
@@ -182,7 +182,7 @@
     <div class="stitle">Critères d'évaluation</div>
     <div id="sc-list"></div>
     <div class="add-row">
-      <input type="text" id="nc-name" placeholder="Nom du critère…" onkeydown="if(event.key==='Enter')aC()"/>
+      <input type="text" id="nc-name" placeholder="Nom du critère…" onkeydown="if(event.key==='Enter')aC()" onblur="if(this.value.trim())aC()"/>
       <input type="number" class="num-in" id="nc-w" value="20" min="0" max="100"/>
       <span class="pct">%</span>
       <button class="btn-sm" onclick="aC()">+</button>
@@ -192,7 +192,7 @@
     <div class="stitle" style="margin-top:8px">Collaborateurs</div>
     <div id="sp-list"></div>
     <div class="add-row">
-      <input type="text" id="np-name" placeholder="Prénom Nom…" onkeydown="if(event.key==='Enter')aP()"/>
+      <input type="text" id="np-name" placeholder="Prénom Nom…" onkeydown="if(event.key==='Enter')aP()" onblur="if(this.value.trim())aP()"/>
       <button class="btn-sm" onclick="aP()">+</button>
     </div>
 
