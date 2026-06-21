@@ -87,6 +87,11 @@
     }
     .pct { color: var(--muted); font-size: 13px; min-width: 14px; }
     .del { background: none; border: none; color: var(--faint); font-size: 20px; cursor: pointer; padding: 0 2px; line-height: 1; }
+    .type-sel {
+      flex: 1; background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--accent); font-size: 13px; font-weight: 600;
+      padding: 7px 8px; outline: none; -webkit-appearance: none; appearance: none;
+    }
 
     /* ── ADD ROW ── */
     .add-row {
@@ -275,7 +280,7 @@
 
   <!-- ══════════ TAB 1 — NOTES ══════════ -->
   <div class="page" id="p1">
-    <p class="info">Notez chaque collaborateur de 0 à 10 sur chaque critère.</p>
+    <p class="info">Notez chaque collaborateur de 0 à 10, ou saisissez une valeur brute pour les critères Min/Max.</p>
     <div id="elist" style="display:flex;flex-direction:column;gap:12px"></div>
   </div>
 
@@ -323,7 +328,28 @@ function gLbl(s){
   return 'À améliorer';
 }
 function bCol(v){ return v>=7.5?'#2ECC71':v>=5?'#FFA500':'#E74C3C'; }
-function getS(pid,cid){ return scores[pid+'_'+cid]??5; }
+function getRaw(pid,cid){ return scores[pid+'_'+cid]??null; }
+function getS(pid,cid){
+  const c = crit.find(x=>x.id===cid);
+  if(!c || c.type==='note' || c.type===undefined){
+    return scores[pid+'_'+cid]??5;
+  }
+  // Valeur brute -> note 0-10 selon barème
+  const raw = scores[pid+'_'+cid];
+  const v = (raw===undefined||raw===null) ? c.bmin : raw;
+  const bmin=c.bmin, bmax=c.bmax;
+  if(bmax===bmin) return 5;
+  let pct;
+  if(c.type==='min'){
+    // plus bas = mieux : bmin -> 10, bmax -> 0
+    pct = (bmax - v) / (bmax - bmin);
+  } else {
+    // max : plus haut = mieux : bmin -> 0, bmax -> 10
+    pct = (v - bmin) / (bmax - bmin);
+  }
+  pct = Math.max(0, Math.min(1, pct));
+  return pct*10;
+}
 function wScore(pid){ return crit.reduce((s,c)=>s+getS(pid,c.id)*(c.weight/100),0); }
 function coefFor(s){
   if(!useCoef) return 1;
@@ -378,15 +404,40 @@ function rConfig(){
   const cl=document.getElementById('sc-list');
   cl.innerHTML='';
   crit.forEach(c=>{
+    if(c.type===undefined) c.type='note';
+    if(c.bmin===undefined) c.bmin=0;
+    if(c.bmax===undefined) c.bmax=10000;
     const d=document.createElement('div');
     d.className='item';
+    d.style.flexDirection='column';
+    d.style.alignItems='stretch';
+    d.style.gap='8px';
+    const isVal = c.type!=='note';
     d.innerHTML=`
-      <input type="text" value="${esc(c.name)}" placeholder="Critère"
-        oninput="crit.find(x=>x.id==='${c.id}').name=this.value;updHdr()"/>
-      <input type="number" class="num-in" value="${c.weight}" min="0" max="100"
-        oninput="crit.find(x=>x.id==='${c.id}').weight=Math.max(0,Math.min(100,+this.value||0));rWtot()"/>
-      <span class="pct">%</span>
-      <button class="del" onclick="dC('${c.id}')">✕</button>`;
+      <div style="display:flex;align-items:center;gap:6px">
+        <input type="text" value="${esc(c.name)}" placeholder="Critère" style="flex:1"
+          oninput="crit.find(x=>x.id==='${c.id}').name=this.value;updHdr()"/>
+        <input type="number" class="num-in" value="${c.weight}" min="0" max="100"
+          oninput="crit.find(x=>x.id==='${c.id}').weight=Math.max(0,Math.min(100,+this.value||0));rWtot()"/>
+        <span class="pct">%</span>
+        <button class="del" onclick="dC('${c.id}')">✕</button>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <select class="type-sel" onchange="setCType('${c.id}',this.value)">
+          <option value="note" ${c.type==='note'?'selected':''}>Note 0–10</option>
+          <option value="min" ${c.type==='min'?'selected':''}>Valeur — Min (plus bas = mieux)</option>
+          <option value="max" ${c.type==='max'?'selected':''}>Valeur — Max (plus haut = mieux)</option>
+        </select>
+      </div>
+      ${isVal?`
+      <div style="display:flex;gap:6px;align-items:center">
+        <span class="pct" style="min-width:auto">Barème :</span>
+        <input type="number" class="num-in" style="width:70px" value="${c.bmin}"
+          oninput="crit.find(x=>x.id==='${c.id}').bmin=+this.value||0"/>
+        <span class="pct">→</span>
+        <input type="number" class="num-in" style="width:70px" value="${c.bmax}"
+          oninput="crit.find(x=>x.id==='${c.id}').bmax=+this.value||0"/>
+      </div>`:''}`;
     cl.appendChild(d);
   });
 
@@ -403,6 +454,13 @@ function rConfig(){
   });
 
   rWtot(); updHdr();
+}
+
+function setCType(id,val){
+  const c=crit.find(x=>x.id===id);
+  c.type=val;
+  rConfig();
+  save();
 }
 
 function rWtot(){
@@ -437,6 +495,22 @@ function renderEvals(){
     const card=document.createElement('div');
     card.className='ecard';
     const rows=crit.map(c=>{
+      const isVal = c.type==='min'||c.type==='max';
+      if(isVal){
+        const raw = getRaw(p.id,c.id);
+        const dispVal = (raw===null||raw===undefined) ? '' : raw;
+        const computed = getS(p.id,c.id);
+        const tagLbl = c.type==='min' ? 'Min ↓' : 'Max ↑';
+        return `<div class="crow">
+          <div class="crow-lbl">
+            <div class="crow-name">${esc(c.name)} <span style="color:var(--accent);font-size:10px;font-weight:700">${tagLbl}</span></div>
+            <div class="crow-w">Poids : ${c.weight}% · Barème ${c.bmin}–${c.bmax} · ⇒ ${fmtD(computed)}/10</div>
+            <div class="bar"><div class="bar-f" id="b-${p.id}-${c.id}" style="width:${computed*10}%;background:${bCol(computed)}"></div></div>
+          </div>
+          <input type="number" class="sc" step="0.01" placeholder="valeur" value="${dispVal}"
+            onchange="updRaw('${p.id}','${c.id}',this.value)"/>
+        </div>`;
+      }
       const v=getS(p.id,c.id);
       return `<div class="crow">
         <div class="crow-lbl">
@@ -468,14 +542,28 @@ function renderEvals(){
 function updS(pid,cid,val){
   const v=Math.min(10,Math.max(0,parseFloat(val)||0));
   scores[pid+'_'+cid]=v;
+  refreshAfterScoreChange(pid,cid);
+}
+
+function updRaw(pid,cid,val){
+  const v=parseFloat(val);
+  scores[pid+'_'+cid]= isNaN(v) ? null : v;
+  refreshAfterScoreChange(pid,cid);
+}
+
+function refreshAfterScoreChange(pid,cid){
+  // Met à jour la barre du champ modifié
+  const computed=getS(pid,cid);
   const b=document.getElementById('b-'+pid+'-'+cid);
-  if(b){b.style.width=(v*10)+'%';b.style.background=bCol(v);}
+  if(b){b.style.width=(computed*10)+'%';b.style.background=bCol(computed);}
+  // Met à jour la note totale + badge du collaborateur concerné
   const tot=wScore(pid);
   const col=gCol(tot);
   const se=document.getElementById('st-'+pid);
   const ge=document.getElementById('gr-'+pid);
   if(se){se.textContent=fmtD(tot);se.style.color=col;}
   if(ge){ge.textContent=gLbl(tot);ge.style.color=col;ge.style.background=col+'22';ge.style.borderColor=col+'44';}
+  save();
 }
 
 // ── Results ───────────────────────────────────────────
@@ -608,8 +696,7 @@ function restoreUI(){
 // Patch all mutating functions to auto-save
 const _rConfig = rConfig;
 rConfig = function(){ _rConfig(); save(); };
-const _updS = updS;
-updS = function(pid,cid,val){ _updS(pid,cid,val); save(); };
+// updS/updRaw already call save() internally via refreshAfterScoreChange
 const _togCoef = togCoef;
 togCoef = function(){ _togCoef(); save(); };
 const _togMM = togMM;
